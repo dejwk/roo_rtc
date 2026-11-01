@@ -1,0 +1,32 @@
+{
+  "name": "roo_rtc",
+  "description": "Arduino and ESP-IDF RTC drivers integrated with roo_time.",
+  "authors": [
+    {
+      "name": "Dejwk",
+      "email": "dejwk.oss@gmail.com",
+      "maintainer": true
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dejwk/roo_rtc"
+  },
+  "version": "0.1.0",
+  "homepage": "https://github.com/dejwk/roo_rtc",
+  "frameworks": [
+    "Arduino",
+    "*"
+  ],
+  "build": {
+    "srcDir": "src",
+    "srcFilter": "+<*> -<examples> -<test>"
+  },
+  "examples": [
+    "examples/*/*.ino"
+  ],
+  "dependencies": {
+    "dejwk/roo_time": ">=2.0.0",
+    "dejwk/roo_io": ">=2.4.1"
+  }
+}

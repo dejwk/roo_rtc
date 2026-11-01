@@ -1,0 +1,12 @@
+common --registry="https://raw.githubusercontent.com/dejwk/roo-registry/main/" --registry="https://bcr.bazel.build"
+
+# AddressSanitizer: append --config=asan to bazel build, test, or run.
+import %workspace%/.roo_testing/bazelrc/common/asan.bazelrc
+import %workspace%/.roo_testing/bazelrc/esp32/base.bazelrc
+import %workspace%/.roo_testing/bazelrc/esp32/arduino.bazelrc
+import %workspace%/.roo_testing/bazelrc/esp32/idf.bazelrc
+
+# Bazelisk defaults configured commands to Arduino unless a frontend is selected.
+
+# GCC 14 can emit spurious maybe-uninitialized warnings in glog's logging.cc under ASAN.
+build:asan --per_file_copt=.*glog\+.*logging\.cc@-Wno-maybe-uninitialized
