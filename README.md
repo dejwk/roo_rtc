@@ -162,13 +162,37 @@ are outside this initial calendar-driver API.
 
 ## Build and tests
 
-Bazel targets `:i2c` and `:spi` let applications select transports; `:roo_rtc`
-aggregates both. `:rtc_test` compiles the production code against scripted
-register boundaries. It checks independent datasheet bytes, calendar bounds,
-12-hour modes, cache behavior, time loss, every required transaction failure,
-short Arduino reads/writes, initialization retry, and RV-8803 rollover.
-`:ds3231_integration_test` uses roo_testing's pin-routed device emulator through
-the real Arduino/IDF adapters. Tests establish software behavior, not electrical
+Public Bazel targets are device-specific:
+
+```bzl
+deps = ["@roo_rtc//:ds3231"]
+```
+
+The seven targets are `:ds3231`, `:ds3232`, `:ds3234`, `:ds1307`, `:pcf8523`,
+`:rv3028`, and `:rv8803`. Each builds only that driver and its required
+transport. `:roo_rtc` aggregates all drivers. Shared `//src:calendar` and
+`//src:i2c_clock` targets have restricted visibility; applications depend on
+public device targets. Earlier `:i2c`, `:spi`, and `:calendar` labels have been
+replaced by this device-oriented build surface.
+
+Each device has an integration target under `//test`, for example:
+
+```sh
+bazel test //test:ds3231_test //test:ds3234_test
+```
+
+The corresponding targets for the other five devices follow the same naming.
+They run production drivers and real `roo_io` adapters against pin-routed
+`roo_testing` fakes on Arduino and native ESP-IDF. Coverage includes independent
+oscillator advancement, leap-day/year rollover, invalid calendars, time-loss
+recovery, 12-hour modes, stopped clocks, pending event flags, backup settings,
+and RV-8803 live-read retries. The fakes' own tests separately check explicit
+datasheet bytes and protocol behavior, without depending on roo_rtc.
+
+`//test:rtc_test` retains scripted transport-failure and cache tests, including
+short Arduino transfers and every required transaction failure. The former
+root test labels `:rtc_test` and `:ds3231_integration_test` remain aliases for
+compatibility. These checks establish software behavior, not electrical
 behavior on physical hardware.
 
 Until dependencies are published, use local overrides from this repository:

@@ -9,7 +9,7 @@ cc_binary(
         "//conditions:default": ["@platforms//:incompatible"],
     }),
     deps = [
-        "//:i2c",
+        "//:ds3231",
         "@roo_testing//:esp_idf_main",
         "@roo_testing//roo_testing/devices/clock/ds3231",
         "@roo_testing//roo_testing/microcontrollers/esp32:core",
