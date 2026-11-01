@@ -1,5 +1,6 @@
 #include <algorithm>
 
+#include "driver/gpio.h"
 #include "driver/i2c_master.h"
 #include "driver/spi_master.h"
 #include "registers.h"
@@ -13,6 +14,13 @@ i2c_master_dev_t device;
 spi_device_t spi;
 }  // namespace
 extern "C" {
+esp_err_t gpio_set_level(gpio_num_t, uint32_t) { return ESP_OK; }
+esp_err_t gpio_set_direction(gpio_num_t, gpio_mode_t) { return ESP_OK; }
+esp_err_t spi_device_acquire_bus(spi_device_handle_t, uint32_t) {
+  return ESP_OK;
+}
+void spi_device_release_bus(spi_device_handle_t) {}
+
 esp_err_t i2c_master_get_bus_handle(i2c_port_num_t,
                                     i2c_master_bus_handle_t* out) {
   *out = &bus;
