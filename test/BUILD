@@ -21,6 +21,10 @@ cc_test(
         "//conditions:default": [],
     }),
     linkstatic = True,
+    target_compatible_with = select({
+        "@roo_testing//roo_testing/platforms:is_pico": ["@platforms//:incompatible"],
+        "//conditions:default": [],
+    }),
     deps = [
         "//src:driver_headers",
         "@googletest//:gtest_main",
@@ -41,6 +45,10 @@ cc_test(
     name = "ds3231_test",
     size = "small",
     srcs = ["device_test.cpp"],
+    copts = [
+        "-fno-rtti",
+        "-fno-exceptions",
+    ],
     defines = [
         "RTC_HEADER=roo_rtc/ds3231.h",
         "FAKE_HEADER=roo_testing/devices/clock/ds3231/ds3231.h",
@@ -52,10 +60,15 @@ cc_test(
     deps = [
         "//:ds3231",
         "@roo_testing//roo_testing/devices/clock/ds3231",
-        "@roo_testing//roo_testing/microcontrollers/esp32:core",
     ] + select({
+        "@roo_testing//roo_testing/platforms:is_arduino_rp2040": ["@roo_testing//roo_testing/microcontrollers/rp2040:pico"],
+        "@roo_testing//roo_testing/platforms:is_pico": ["@roo_testing//roo_testing/microcontrollers/rp2040:pico"],
+        "//conditions:default": ["@roo_testing//roo_testing/microcontrollers/esp32:core"],
+    }) + select({
         "@roo_testing//roo_testing/platforms:is_idf": ["@roo_testing//:esp_idf_gtest_main"],
-        "//conditions:default": ["@roo_testing//:arduino_gtest_main"],
+        "@roo_testing//roo_testing/platforms:is_arduino": ["@roo_testing//:arduino_gtest_main"],
+        "@roo_testing//roo_testing/platforms:is_pico": ["@roo_testing//:pico_gtest_main"],
+        "//conditions:default": [],
     }),
 )
 
@@ -63,6 +76,10 @@ cc_test(
     name = "ds3232_test",
     size = "small",
     srcs = ["device_test.cpp"],
+    copts = [
+        "-fno-rtti",
+        "-fno-exceptions",
+    ],
     defines = [
         "RTC_HEADER=roo_rtc/ds3232.h",
         "FAKE_HEADER=roo_testing/devices/clock/ds3232/ds3232.h",
@@ -74,10 +91,15 @@ cc_test(
     deps = [
         "//:ds3232",
         "@roo_testing//roo_testing/devices/clock/ds3232",
-        "@roo_testing//roo_testing/microcontrollers/esp32:core",
     ] + select({
+        "@roo_testing//roo_testing/platforms:is_arduino_rp2040": ["@roo_testing//roo_testing/microcontrollers/rp2040:pico"],
+        "@roo_testing//roo_testing/platforms:is_pico": ["@roo_testing//roo_testing/microcontrollers/rp2040:pico"],
+        "//conditions:default": ["@roo_testing//roo_testing/microcontrollers/esp32:core"],
+    }) + select({
         "@roo_testing//roo_testing/platforms:is_idf": ["@roo_testing//:esp_idf_gtest_main"],
-        "//conditions:default": ["@roo_testing//:arduino_gtest_main"],
+        "@roo_testing//roo_testing/platforms:is_arduino": ["@roo_testing//:arduino_gtest_main"],
+        "@roo_testing//roo_testing/platforms:is_pico": ["@roo_testing//:pico_gtest_main"],
+        "//conditions:default": [],
     }),
 )
 
@@ -85,6 +107,10 @@ cc_test(
     name = "ds3234_test",
     size = "small",
     srcs = ["device_test.cpp"],
+    copts = [
+        "-fno-rtti",
+        "-fno-exceptions",
+    ],
     defines = [
         "RTC_HEADER=roo_rtc/ds3234.h",
         "FAKE_HEADER=roo_testing/devices/clock/ds3234/ds3234.h",
@@ -96,10 +122,15 @@ cc_test(
     deps = [
         "//:ds3234",
         "@roo_testing//roo_testing/devices/clock/ds3234",
-        "@roo_testing//roo_testing/microcontrollers/esp32:core",
     ] + select({
+        "@roo_testing//roo_testing/platforms:is_arduino_rp2040": ["@roo_testing//roo_testing/microcontrollers/rp2040:pico"],
+        "@roo_testing//roo_testing/platforms:is_pico": ["@roo_testing//roo_testing/microcontrollers/rp2040:pico"],
+        "//conditions:default": ["@roo_testing//roo_testing/microcontrollers/esp32:core"],
+    }) + select({
         "@roo_testing//roo_testing/platforms:is_idf": ["@roo_testing//:esp_idf_gtest_main"],
-        "//conditions:default": ["@roo_testing//:arduino_gtest_main"],
+        "@roo_testing//roo_testing/platforms:is_arduino": ["@roo_testing//:arduino_gtest_main"],
+        "@roo_testing//roo_testing/platforms:is_pico": ["@roo_testing//:pico_gtest_main"],
+        "//conditions:default": [],
     }),
 )
 
@@ -107,6 +138,10 @@ cc_test(
     name = "ds1307_test",
     size = "small",
     srcs = ["device_test.cpp"],
+    copts = [
+        "-fno-rtti",
+        "-fno-exceptions",
+    ],
     defines = [
         "RTC_HEADER=roo_rtc/ds1307.h",
         "FAKE_HEADER=roo_testing/devices/clock/ds1307/ds1307.h",
@@ -118,10 +153,15 @@ cc_test(
     deps = [
         "//:ds1307",
         "@roo_testing//roo_testing/devices/clock/ds1307",
-        "@roo_testing//roo_testing/microcontrollers/esp32:core",
     ] + select({
+        "@roo_testing//roo_testing/platforms:is_arduino_rp2040": ["@roo_testing//roo_testing/microcontrollers/rp2040:pico"],
+        "@roo_testing//roo_testing/platforms:is_pico": ["@roo_testing//roo_testing/microcontrollers/rp2040:pico"],
+        "//conditions:default": ["@roo_testing//roo_testing/microcontrollers/esp32:core"],
+    }) + select({
         "@roo_testing//roo_testing/platforms:is_idf": ["@roo_testing//:esp_idf_gtest_main"],
-        "//conditions:default": ["@roo_testing//:arduino_gtest_main"],
+        "@roo_testing//roo_testing/platforms:is_arduino": ["@roo_testing//:arduino_gtest_main"],
+        "@roo_testing//roo_testing/platforms:is_pico": ["@roo_testing//:pico_gtest_main"],
+        "//conditions:default": [],
     }),
 )
 
@@ -129,6 +169,10 @@ cc_test(
     name = "pcf8523_test",
     size = "small",
     srcs = ["device_test.cpp"],
+    copts = [
+        "-fno-rtti",
+        "-fno-exceptions",
+    ],
     defines = [
         "RTC_HEADER=roo_rtc/pcf8523.h",
         "FAKE_HEADER=roo_testing/devices/clock/pcf8523/pcf8523.h",
@@ -140,10 +184,15 @@ cc_test(
     deps = [
         "//:pcf8523",
         "@roo_testing//roo_testing/devices/clock/pcf8523",
-        "@roo_testing//roo_testing/microcontrollers/esp32:core",
     ] + select({
+        "@roo_testing//roo_testing/platforms:is_arduino_rp2040": ["@roo_testing//roo_testing/microcontrollers/rp2040:pico"],
+        "@roo_testing//roo_testing/platforms:is_pico": ["@roo_testing//roo_testing/microcontrollers/rp2040:pico"],
+        "//conditions:default": ["@roo_testing//roo_testing/microcontrollers/esp32:core"],
+    }) + select({
         "@roo_testing//roo_testing/platforms:is_idf": ["@roo_testing//:esp_idf_gtest_main"],
-        "//conditions:default": ["@roo_testing//:arduino_gtest_main"],
+        "@roo_testing//roo_testing/platforms:is_arduino": ["@roo_testing//:arduino_gtest_main"],
+        "@roo_testing//roo_testing/platforms:is_pico": ["@roo_testing//:pico_gtest_main"],
+        "//conditions:default": [],
     }),
 )
 
@@ -151,6 +200,10 @@ cc_test(
     name = "rv3028_test",
     size = "small",
     srcs = ["device_test.cpp"],
+    copts = [
+        "-fno-rtti",
+        "-fno-exceptions",
+    ],
     defines = [
         "RTC_HEADER=roo_rtc/rv3028.h",
         "FAKE_HEADER=roo_testing/devices/clock/rv3028/rv3028.h",
@@ -162,10 +215,15 @@ cc_test(
     deps = [
         "//:rv3028",
         "@roo_testing//roo_testing/devices/clock/rv3028",
-        "@roo_testing//roo_testing/microcontrollers/esp32:core",
     ] + select({
+        "@roo_testing//roo_testing/platforms:is_arduino_rp2040": ["@roo_testing//roo_testing/microcontrollers/rp2040:pico"],
+        "@roo_testing//roo_testing/platforms:is_pico": ["@roo_testing//roo_testing/microcontrollers/rp2040:pico"],
+        "//conditions:default": ["@roo_testing//roo_testing/microcontrollers/esp32:core"],
+    }) + select({
         "@roo_testing//roo_testing/platforms:is_idf": ["@roo_testing//:esp_idf_gtest_main"],
-        "//conditions:default": ["@roo_testing//:arduino_gtest_main"],
+        "@roo_testing//roo_testing/platforms:is_arduino": ["@roo_testing//:arduino_gtest_main"],
+        "@roo_testing//roo_testing/platforms:is_pico": ["@roo_testing//:pico_gtest_main"],
+        "//conditions:default": [],
     }),
 )
 
@@ -173,6 +231,10 @@ cc_test(
     name = "rv8803_test",
     size = "small",
     srcs = ["device_test.cpp"],
+    copts = [
+        "-fno-rtti",
+        "-fno-exceptions",
+    ],
     defines = [
         "RTC_HEADER=roo_rtc/rv8803.h",
         "FAKE_HEADER=roo_testing/devices/clock/rv8803/rv8803.h",
@@ -184,9 +246,14 @@ cc_test(
     deps = [
         "//:rv8803",
         "@roo_testing//roo_testing/devices/clock/rv8803",
-        "@roo_testing//roo_testing/microcontrollers/esp32:core",
     ] + select({
+        "@roo_testing//roo_testing/platforms:is_arduino_rp2040": ["@roo_testing//roo_testing/microcontrollers/rp2040:pico"],
+        "@roo_testing//roo_testing/platforms:is_pico": ["@roo_testing//roo_testing/microcontrollers/rp2040:pico"],
+        "//conditions:default": ["@roo_testing//roo_testing/microcontrollers/esp32:core"],
+    }) + select({
         "@roo_testing//roo_testing/platforms:is_idf": ["@roo_testing//:esp_idf_gtest_main"],
-        "//conditions:default": ["@roo_testing//:arduino_gtest_main"],
+        "@roo_testing//roo_testing/platforms:is_arduino": ["@roo_testing//:arduino_gtest_main"],
+        "@roo_testing//roo_testing/platforms:is_pico": ["@roo_testing//:pico_gtest_main"],
+        "//conditions:default": [],
     }),
 )

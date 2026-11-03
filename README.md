@@ -229,3 +229,10 @@ instead of directly seeding the cache. This is source, not binary, compatibility
 - [PCF8523 datasheet](https://www.nxp.com/docs/en/data-sheet/PCF8523.pdf)
 - [RV-3028 application manual](https://www.microcrystal.com/fileadmin/Media/Products/RTC/App.Manual/RV-3028-C7_App-Manual.pdf)
 - [RV-8803 application manual](https://www.microcrystal.com/fileadmin/Media/Products/RTC/App.Manual/RV-8803-C7_App-Manual.pdf)
+
+Pico builds use the matching roo_io backend: Arduino-Pico uses Wire/SPI and
+SDK-only Pico uses application-initialized SDK controllers. Select roo_io 2.5.0
+or newer (the module pin includes it). The real-device fake tests run for all
+seven clocks on SDK-only Pico, Arduino-Pico bare-metal and Arduino-Pico
+FreeRTOS, alongside the six ESP profiles. Initialize and route the borrowed bus before
+calling init() on the clock and keep it alive until all clock operations finish.

@@ -8,14 +8,32 @@
 #include <vector>
 
 #include "gtest/gtest.h"
+#if defined(ROO_TESTING_SOC_RP2040)
+#include "roo_testing/microcontrollers/rp2040/fake_pico.h"
+#if !defined(ARDUINO)
+#include <hardware/gpio.h>
+#include <hardware/i2c.h>
+#include <hardware/spi.h>
+#endif
+#else
 #include "roo_testing/microcontrollers/esp32/fake_esp32.h"
+#endif
 
-#if RTC_DEVICE == 2 && !defined(ARDUINO)
+#if RTC_DEVICE == 2 && !defined(ARDUINO) && !defined(ROO_TESTING_SOC_RP2040)
 #include "driver/spi_master.h"
 #endif
 
 namespace {
 using namespace roo_time;
+#if defined(ROO_TESTING_SOC_RP2040)
+constexpr int kMiso = 16;
+constexpr int kMosi = 19;
+constexpr int kCs = 17;
+#else
+constexpr int kMiso = 19;
+constexpr int kMosi = 21;
+constexpr int kCs = 5;
+#endif
 
 // The device oscillator is independent of application uptime/cache. A stepped
 // source can exercise RV-8803's live reads while deterministic delays test
@@ -55,11 +73,20 @@ struct Hardware {
   FAKE_CLASS device{&time};
 #endif
   Hardware() {
+#if defined(ROO_TESTING_SOC_RP2040)
 #if RTC_DEVICE == 2
-    FakeEsp32().attachSpiDevice(device, 18, 19, 23);
-    FakeEsp32().gpio.attachOutput(5, device.cs());
+    FakePico().attachSpiDevice(device, 18, kMiso, kMosi);
+    FakePico().attachOutput(kCs, device.cs());
+#else
+    FakePico().attachI2cDevice(device, 4, 5);
+#endif
+#else
+#if RTC_DEVICE == 2
+    FakeEsp32().attachSpiDevice(device, 18, kMiso, kMosi);
+    FakeEsp32().gpio.attachOutput(kCs, device.cs());
 #else
     FakeEsp32().attachI2cDevice(device, 18, 19);
+#endif
 #endif
   }
 } hardware;
@@ -81,21 +108,42 @@ class DeviceTest : public testing::Test {
     hardware.device.reset();
 #if RTC_DEVICE == 2
 #if defined(ARDUINO)
-    SPI.begin(18, 19, 23);
-    driver_.reset(new roo_rtc::RTC_CLASS(roo_io::SpiMasterBusHandle(SPI), 5));
+#if defined(ROO_TESTING_SOC_RP2040)
+    SPI.begin();
+#else
+    SPI.begin(18, kMiso, kMosi);
+#endif
+    driver_.reset(new roo_rtc::RTC_CLASS(roo_io::SpiMasterBusHandle(SPI), kCs));
+#elif defined(ROO_TESTING_SOC_RP2040)
+    spi_init(spi0, 1000000);
+    for (int pin : {18, kMiso, kMosi}) gpio_set_function(pin, GPIO_FUNC_SPI);
+    driver_.reset(
+        new roo_rtc::RTC_CLASS(roo_io::SpiMasterBusHandle(spi0), kCs));
 #else
     spi_bus_config_t config = {};
     config.sclk_io_num = 18;
-    config.miso_io_num = 19;
-    config.mosi_io_num = 23;
+    config.miso_io_num = kMiso;
+    config.mosi_io_num = kMosi;
     config.quadwp_io_num = -1;
     config.quadhd_io_num = -1;
     ASSERT_EQ(ESP_OK, spi_bus_initialize(SPI2_HOST, &config, SPI_DMA_DISABLED));
     driver_.reset(
-        new roo_rtc::RTC_CLASS(roo_io::SpiMasterBusHandle(SPI2_HOST), 5));
+        new roo_rtc::RTC_CLASS(roo_io::SpiMasterBusHandle(SPI2_HOST), kCs));
+#endif
+#else
+#if defined(ROO_TESTING_SOC_RP2040)
+#if defined(ARDUINO)
+    Wire.setSDA(4);
+    Wire.setSCL(5);
+    bus_.init();
+#else
+    i2c_init(i2c0, 100000);
+    gpio_set_function(4, GPIO_FUNC_I2C);
+    gpio_set_function(5, GPIO_FUNC_I2C);
 #endif
 #else
     ASSERT_TRUE(bus_.init(18, 19, 100000));
+#endif
     driver_.reset(new roo_rtc::RTC_CLASS(bus_));
 #endif
     ASSERT_TRUE(driver_->init());
@@ -107,8 +155,16 @@ class DeviceTest : public testing::Test {
     EXPECT_FALSE(hardware.device.protocolError());
 #if defined(ARDUINO)
     SPI.end();
+#elif defined(ROO_TESTING_SOC_RP2040)
+    spi_deinit(spi0);
 #else
     EXPECT_EQ(ESP_OK, spi_bus_free(SPI2_HOST));
+#endif
+#elif defined(ROO_TESTING_SOC_RP2040)
+#if defined(ARDUINO)
+    Wire.end();
+#else
+    i2c_deinit(i2c0);
 #endif
 #endif
   }
@@ -144,8 +200,9 @@ class DeviceTest : public testing::Test {
   std::unique_ptr<roo_rtc::RTC_CLASS> driver_;
 };
 
-// Verifies the real Arduino/IDF adapter reaches this chip's fake, observes its
-// power-on invalidity, and sets/reads a trusted date with correct raw bytes.
+// Verifies the selected Arduino/IDF/SDK adapter reaches the chip fake and
+// observes power-on invalidity, and sets/reads a trusted date with correct raw
+// bytes.
 TEST_F(DeviceTest, PowerOnAndRoundTrip) {
   EXPECT_EQ(roo_rtc::ReadStatus::kTimeLost, driver_->read().status);
   ASSERT_TRUE(driver_->set(expected()));
