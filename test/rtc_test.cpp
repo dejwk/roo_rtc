@@ -167,15 +167,21 @@ TEST_P(RtcTest, WritesWholeSecondsAndPreservesOtherRegisters) {
   EXPECT_EQ(expected(), clock->now());
 }
 
-// Verifies unsupported years and unset inputs fail before changing hardware.
+// Verifies invalid inputs are rejected before any register access.
 TEST_P(RtcTest, RejectsUnrepresentableWrites) {
-  std::unique_ptr<Clock> clock = make();
+  const UtcOffset offset(Hours(2));
+  std::unique_ptr<Clock> clock = make(Micros(0), offset);
   ASSERT_TRUE(clock->init());
-  for (int year : {1999, 2100, 2199}) {
-    EXPECT_FALSE(
-        clock->set(DateTime(year, 1, 1, 0, 0, 0, 0, timezone::UTC).wallTime()));
+  const WallTime first = DateTime(2000, 1, 1, offset).wallTime();
+  const WallTime limit = DateTime(2100, 1, 1, offset).wallTime();
+  // 67536-01-01 UTC would wrap to year 2000 during DateTime conversion.
+  const WallTime wrapped_year = WallTime::SinceEpoch(Seconds(2069063049600LL));
+  for (WallTime time : {first - Micros(1), limit, wrapped_year,
+                        WallTime::SinceEpoch(Duration::Max()),
+                        WallTime::Unset()}) {
+    EXPECT_FALSE(clock->set(time));
   }
-  EXPECT_FALSE(clock->set(WallTime::Unset()));
+  EXPECT_EQ(0, regs.reads);
   EXPECT_EQ(0, regs.writes);
 }
 
@@ -328,15 +334,18 @@ TEST_P(RtcTest, SetPreservesEventFlagsAndControl) {
 
 // Verifies documented range endpoints and weekday-independent read decoding.
 TEST_P(RtcTest, SupportedEndpointsAndIgnoredWeekday) {
-  std::unique_ptr<Clock> clock = make(Micros(0));
+  const UtcOffset offset(Hours(-2));
+  std::unique_ptr<Clock> clock = make(Micros(0), offset);
   ASSERT_TRUE(clock->init());
-  for (int year : {2000, 2099}) {
-    const WallTime time =
-        DateTime(year, 12, 31, 23, 59, 59, 0, timezone::UTC).wallTime();
+  const WallTime first = DateTime(2000, 1, 1, offset).wallTime();
+  const WallTime last = DateTime(2100, 1, 1, offset).wallTime() - Seconds(1);
+  for (WallTime time : {first, last}) {
     ASSERT_TRUE(clock->set(time));
     regs.data[base() + (dayIndex() == 3 ? 4 : 3)] = 0xff;
     EXPECT_EQ(time, clock->read().time);
   }
+  ASSERT_TRUE(clock->set(last + Micros(999999)));
+  EXPECT_EQ(last, clock->read().time);
 }
 
 INSTANTIATE_TEST_SUITE_P(AllChips, RtcTest,

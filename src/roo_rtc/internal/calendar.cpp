@@ -176,8 +176,11 @@ bool CalendarClock::writeRegister(uint8_t reg, uint8_t value) {
 }
 
 bool CalendarClock::writeHardware(WallTime time) {
+  // Compare instants before DateTime narrows the civil year to 16 bits.
+  const WallTime first = DateTime(2000, 1, 1, offset_).wallTime();
+  const WallTime limit = DateTime(2100, 1, 1, offset_).wallTime();
+  if (time < first || time >= limit) return false;
   const DateTime dt(time, offset_);
-  if (dt.year() < 2000 || dt.year() > 2099) return false;
   uint8_t control;
   uint8_t flags;
   if (!readState(control, flags)) return false;
