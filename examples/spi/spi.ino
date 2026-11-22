@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <SPI.h>
 
+#include "roo_io/spi/spi.h"
 #include "roo_rtc/ds3234.h"
 
 roo_rtc::Ds3234Clock rtc(5);

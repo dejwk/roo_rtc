@@ -3,5 +3,8 @@ load("@roo_testing//roo_testing/emulation:arduino.bzl", "roo_arduino_example")
 roo_arduino_example(
     name = "simple",
     sketch = "simple.ino",
-    deps = ["//:ds3231"],
+    deps = [
+        "//:ds3231",
+        "@roo_io//:i2c",
+    ],
 )

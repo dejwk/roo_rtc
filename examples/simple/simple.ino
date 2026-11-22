@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 
+#include "roo_io/i2c/i2c.h"
 #include "roo_rtc/ds3231.h"
 
 roo_rtc::Ds3231Clock rtc;

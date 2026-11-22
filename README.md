@@ -24,6 +24,7 @@ supply; a breakout board does not necessarily provide logic-level conversion.
 
 ```cpp
 #include <Wire.h>
+#include "roo_io/i2c/i2c.h"
 #include "roo_rtc/ds3231.h"
 
 roo_rtc::Ds3231Clock rtc(Wire);
@@ -44,6 +45,8 @@ void loop() {
 }
 ```
 
+The Arduino examples include the matching `roo_io` transport header directly
+for build tools that discover library dependencies from sketch includes.
 Other I²C drivers use the same constructors. `init()` registers the transport
 without resetting the RTC, starting a stopped clock, clearing validity flags,
 changing hour mode, or enabling backup/charging. On Arduino, the application
