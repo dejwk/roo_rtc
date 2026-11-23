@@ -12,7 +12,7 @@
         "type": "git",
         "url": "https://github.com/dejwk/roo_rtc"
     },
-    "version": "0.1.0",
+    "version": "1.0.0",
     "homepage": "https://github.com/dejwk/roo_rtc",
     "frameworks": [
         "Arduino",
