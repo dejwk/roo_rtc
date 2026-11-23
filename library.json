@@ -26,7 +26,7 @@
         "examples/*/*.ino"
     ],
     "dependencies": {
-        "dejwk/roo_time": ">=2.1.0",
+        "dejwk/roo_time": ">=2.2.1",
         "dejwk/roo_io": ">=2.5.0"
     }
 }
